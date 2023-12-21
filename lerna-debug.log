@@ -1,0 +1,15 @@
+0 silly argv { _: [ 'create' ], lernaVersion: '8.0.0', '$0': 'lerna', name: 'zeus' }
+1 notice cli v8.0.0
+2 verbose packageConfigs Explicit "packages" configuration found in lerna.json. Resolving packages using the configured glob(s): ["packages/*"]
+3 verbose rootPath /Users/turtleshell/workspace/turtleshell/evora
+4 warn ENOREMOTE No git remote found, skipping repository property
+5 error Error: canceled
+5 error     at Interface.<anonymous> (/Users/turtleshell/workspace/turtleshell/evora/node_modules/read/lib/read.js:79:15)
+5 error     at Interface.emit (node:events:514:28)
+5 error     at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1125:18)
+5 error     at ReadStream.onkeypress (node:internal/readline/interface:264:20)
+5 error     at ReadStream.emit (node:events:514:28)
+5 error     at emitKeys (node:internal/readline/utils:371:14)
+5 error     at emitKeys.next (<anonymous>)
+5 error     at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+5 error     at ReadStream.emit (node:events:514:28)

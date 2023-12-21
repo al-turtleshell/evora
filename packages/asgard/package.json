@@ -1,0 +1,21 @@
+{
+  "name": "asgard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@turtleshell/daedelium": "file:../daedelium",
+    "io-ts-reporters": "^2.0.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
+}

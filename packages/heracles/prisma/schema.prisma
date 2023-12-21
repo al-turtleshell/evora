@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ImageRequest {
+  id              String              @id @default(uuid())
+  numberOfImages  Int
+  style           ImageStyle
+  description     String
+  prompt          String
+  status          ImageRequestStatus  @default(pending)
+  images          Image[]
+}
+
+model Image {
+  id                String        @id @default(uuid())
+  status            ImageStatus   @default(generated)
+  imageRequestId    String
+  imageRequest      ImageRequest  @relation(fields: [imageRequestId], references: [id])
+}
+
+// should be sync with ImageStatus in @turtleshell/zeus Image
+enum ImageStyle {
+  black_and_white_illustration
+}
+// should be sync with ImageStatus in @turtleshell/zeus Image
+enum ImageStatus {
+  generated
+  accepted
+  rejected
+}
+
+// should be sync with ImageRequestStatus in @turtleshell/zeus ImageRequest
+enum ImageRequestStatus {
+  pending
+  in_progress
+  to_review
+  completed
+}
+
+model MidjourneyChannel {
+  id              String    @id
+  name            String
+  busy            Boolean   @default(false)
+}
