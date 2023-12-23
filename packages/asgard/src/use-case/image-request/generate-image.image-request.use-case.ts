@@ -1,9 +1,10 @@
 import { pipe } from "fp-ts/lib/function";
-import { ImageRequest, ImageRequestDto } from "../../aggregate/image-request/image-request";
+import { ImageRequest,  } from "../../aggregate/image-request/image-request";
 import * as TE from 'fp-ts/lib/TaskEither';
 
 import * as t from 'io-ts';
 import { Miscue, decode } from "@turtleshell/daedelium";
+import { ImageRequestDto } from "../../aggregate/image-request/dtos";
 
 type Context = {
     getById: (imageRequestId: string) => TE.TaskEither<Miscue, ImageRequestDto>;
@@ -26,7 +27,7 @@ export const generateImageImageRequestUsecase = ({ getById, generateImage, save 
                 TE.chainEitherK(ids => ImageRequest.addImages(imageRequest, ids)),
             )),
         )),
-        TE.map(ImageRequest.toDto),
+        TE.chainEitherK(ImageRequest.toDto),
         TE.chain(save)
     )
 };

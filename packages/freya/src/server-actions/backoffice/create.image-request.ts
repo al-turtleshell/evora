@@ -1,31 +1,35 @@
 "use server"
+import * as TE from 'fp-ts/lib/TaskEither';
+import { pipe } from "fp-ts/lib/function";
 
-import { authAction } from '@/lib/safe-action';
-import { createImageRequestUsecase } from '@turtleshell/zeus';
-import { z } from 'zod';
-import { ImageRequestRepository } from '@turtleshell/heracles';
+import * as t from 'io-ts';
+import { safeAction } from "@/lib/safe-action";
+import { ImageStyleEnum } from "@turtleshell/asgard/src/aggregate/image-request/enums";
+import { createImageRequestUsecase } from "@turtleshell/asgard";
+import { ImageRequestRepository } from "@turtleshell/heracles";
+import { Miscue } from "@turtleshell/daedelium";
 import { revalidatePath } from 'next/cache';
 
 
-const predefinedStyle = [
-    "black_and_white_illustration",
-] as const;
+const schema = t.type({
+    numberOfImages: t.string,
+    description: t.string,
+    style: ImageStyleEnum
+})
 
-const schema = z.object({
-    numberOfImages: z.string().refine(n => parseInt(n) % 4 === 0, {
-      message: "must be a multiple of 4",
-    }).transform(n => parseInt(n)),
-    description: z.string().min(5),
-    style: z.enum(predefinedStyle),
-});
 
-export default authAction(schema, async (data, { user }) => {
+export default safeAction<string>()(schema, (data): TE.TaskEither<Miscue, string> => {
     const save = ImageRequestRepository.save;
-    const generatePrompt = async (description: string, style: string) => description;
+    const generatePrompt = (description: string, style: string) => TE.right(description);
 
-    await createImageRequestUsecase({ save, generatePrompt })(data);
-
-    revalidatePath('/backoffice/stocks')
-    return 'Image request created successfully';
-});
-
+    return pipe(
+        createImageRequestUsecase({ save, generatePrompt })({
+            ...data,
+            numberOfImages: parseInt(data.numberOfImages, 10),
+        }),
+        TE.map(() => {
+            revalidatePath('/stocks');
+            return 'Image request created successfully'
+        })
+    )
+})

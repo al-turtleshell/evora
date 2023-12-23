@@ -1,1 +1,0 @@
-{"version":3,"file":"store-image-s3.d.ts","sourceRoot":"","sources":["../src/store-image-s3.ts"],"names":[],"mappings":"AAAA,OAAO,EAAoB,EAAE,EAAE,MAAM,oBAAoB,CAAC;AAG1D,eAAO,MAAM,YAAY,OAAQ,EAAE,cAAc,MAAM,QAAQ,MAAM,gBAAsB,MAAM,KAAG,QAAQ,IAAI,CAU/G,CAAA;AAGD,eAAO,MAAM,aAAa,OAAQ,EAAE,cAAc,MAAM,QAAQ,MAAM,aAAmB,MAAM,EAAE,kBAIhG,CAAA"}

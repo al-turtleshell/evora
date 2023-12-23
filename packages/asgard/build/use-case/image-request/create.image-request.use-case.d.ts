@@ -1,6 +1,6 @@
 import * as TE from "fp-ts/lib/TaskEither";
-import { CreateImageRequestDto, ImageRequestDto } from "../../aggregate/image-request/image-request";
 import { Miscue } from "@turtleshell/daedelium";
+import { CreateImageRequestDto, ImageRequestDto } from "../../aggregate/image-request/dtos";
 type Context = {
     save: (data: ImageRequestDto) => TE.TaskEither<Miscue, ImageRequestDto>;
     generatePrompt: (description: string, style: string) => TE.TaskEither<Miscue, string>;

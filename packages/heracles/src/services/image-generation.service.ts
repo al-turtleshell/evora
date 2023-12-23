@@ -1,13 +1,10 @@
-
-
-import { Client, Message, TextChannel } from "discord.js-selfbot-v13";
+import { Client, TextChannel } from "discord.js-selfbot-v13";
 import { MidjourneyChannelRepository } from "../data-access";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from "fp-ts/lib/function";
-import { Miscue, MiscueCode, retryAction, checkFileAvailability, downloadImage, cutIntoQuadrant } from "@turtleshell/daedelium";
+import { Miscue, MiscueCode, retryAction, downloadImage, cutIntoQuadrant } from "@turtleshell/daedelium";
 import fs from 'fs';
 import { v4 as uuid } from 'uuid';
-import { set } from "fp-ts";
 
 
 const selectChannel = (channels: TextChannel[], repository: MidjourneyChannelRepository) => (): TE.TaskEither<Miscue, TextChannel> => {
@@ -84,8 +81,8 @@ const generateImage = (
             TE.bind('_4',               ({ uuids })     => storeImages(uuids)),
             TE.bind('_5',               ({ uuids })     => cleanUp(id, uuids)),
             TE.bind('_6',               ()              => setChannelAsFree(channel.id)),
-            TE.map(({ uuids })                          => uuids),
-            TE.mapLeft(miscue                           => { console.log('HERE'); setChannelAsFree(channel.id)(); console.log(miscue); return miscue; })
+            TE.map(                     ({ uuids })     => uuids),
+            TE.mapLeft(                 miscue          => { setChannelAsFree(channel.id)(); return miscue; })
         ))
     );
 }
@@ -101,7 +98,6 @@ export const createImageGenerationService = (
     midjourneyBotId: string,
     path: string
 ): TE.TaskEither<Miscue, ImageGenerationService> => {
-    console.log('Generating image generation service')
     return pipe(
         repository.getAllChannel(),
         TE.chain(channels => {
@@ -121,8 +117,6 @@ export const createImageGenerationService = (
                 ) as TE.TaskEither<Miscue, TextChannel[]>
         }),
         TE.map(channels => {
-
-
             const waitForImageCompletion = (channel: TextChannel) => pipe( 
                 retryAction(
                     () => 
@@ -161,5 +155,4 @@ export const createImageGenerationService = (
             }
         })
     )
-
 }

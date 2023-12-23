@@ -1,2 +1,0 @@
-export declare const retryAction: <T>(action: () => Promise<T>, condition: (result: T) => boolean, maxAttempts?: number, interval?: number) => Promise<boolean>;
-//# sourceMappingURL=retry-action.d.ts.map

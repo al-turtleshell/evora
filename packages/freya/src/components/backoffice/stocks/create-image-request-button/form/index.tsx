@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { FormSchema, defaultValues, onSubmit, schema } from './data';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { ImageStyle } from '@turtleshell/asgard/src/aggregate/image-request/image';
+import { ImageStyle } from '@turtleshell/asgard/src/aggregate/image-request/enums';
 
 type Props = {
     closeModal: () => void

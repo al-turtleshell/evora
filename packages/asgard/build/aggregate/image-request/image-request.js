@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ImageRequest = exports.CreateImageRequestDto = exports.ImageRequestStatusEnum = exports.ImageRequestStatus = void 0;
+exports.ImageRequest = void 0;
 const t = __importStar(require("io-ts"));
 const image_1 = require("./image");
 const Either_1 = require("fp-ts/lib/Either");
@@ -31,54 +31,16 @@ const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const uuid_1 = require("uuid");
 const function_1 = require("fp-ts/lib/function");
 const daedelium_1 = require("@turtleshell/daedelium");
-var ImageRequestStatus;
-(function (ImageRequestStatus) {
-    ImageRequestStatus["PENDING"] = "pending";
-    ImageRequestStatus["IN_PROGRESS"] = "in_progress";
-    ImageRequestStatus["TO_REVIEW"] = "to_review";
-    ImageRequestStatus["COMPLETED"] = "completed";
-})(ImageRequestStatus || (exports.ImageRequestStatus = ImageRequestStatus = {}));
-exports.ImageRequestStatusEnum = t.keyof({
-    pending: null,
-    in_progress: null,
-    to_review: null,
-    completed: null
-});
-exports.CreateImageRequestDto = t.intersection([
-    t.type({
-        numberOfImages: t.number,
-        style: t.string,
-        description: t.string
-    }),
-    t.partial({
-        id: t.string,
-        status: t.string,
-        prompt: t.string,
-        images: t.array(image_1.CreateImageDto),
-    })
-]);
-const ImageRequestDto = t.intersection([
-    t.type({
-        id: t.string,
-        status: t.string,
-        images: t.array(image_1.ImageDto),
-        numberOfImages: t.number,
-        style: t.string,
-        description: t.string
-    }),
-    t.partial({
-        prompt: t.string,
-    })
-]);
-const isNumberOfImages = (n) => typeof n === 'number' && n % 4 === 0 && n > 0;
-const NumberOfImages = new t.Type('NumberOfImages', isNumberOfImages, (input, context) => isNumberOfImages(input) ? t.success(input) : t.failure(input, context), t.identity);
+const enums_1 = require("./enums");
+const types_1 = require("./types");
+const miscue_1 = require("../../miscue");
 const ImageRequestCodec = t.intersection([
     t.type({
         id: daedelium_1.UUID,
-        status: exports.ImageRequestStatusEnum,
+        status: enums_1.ImageRequestStatusEnum,
         images: t.array(image_1.ImageCodec),
-        numberOfImages: NumberOfImages,
-        style: image_1.ImageStyleEnum,
+        numberOfImages: types_1.NumberOfImages,
+        style: enums_1.ImageStyleEnum,
         description: t.string
     }),
     t.partial({
@@ -92,17 +54,15 @@ const create = ({ id, numberOfImages, style, description, images, prompt, status
         style,
         description,
         prompt,
-        status: status !== null && status !== void 0 ? status : ImageRequestStatus.PENDING,
+        status: status !== null && status !== void 0 ? status : enums_1.ImageRequestStatus.PENDING,
         images: images !== null && images !== void 0 ? images : []
-    }, (details) => daedelium_1.Miscue.create({
-        code: daedelium_1.MiscueCode.IMAGE_REQUEST_CREATING_ERROR,
-        message: 'Image request creating failed',
-        timestamp: Date.now(),
-        details,
-    }));
+    }, miscue_1.ImageRequestCreatingErrorMiscue);
 };
 const toDto = (imageRequest) => {
-    return {
+    if (imageRequest.prompt === undefined) {
+        return (0, Either_1.left)((0, miscue_1.PromptNotSetMiscue)(imageRequest.id));
+    }
+    return (0, Either_1.right)({
         id: imageRequest.id,
         status: imageRequest.status,
         images: imageRequest.images.map(image => image_1.Image.toDto(image)),
@@ -110,12 +70,12 @@ const toDto = (imageRequest) => {
         style: imageRequest.style,
         description: imageRequest.description,
         prompt: imageRequest.prompt,
-    };
+    });
 };
 const addImage = (imageRequest, id) => {
     return (0, function_1.pipe)(image_1.Image.create({ id }), (0, Either_1.map)(image => {
         const images = [...imageRequest.images, image];
-        return Object.assign(Object.assign({}, imageRequest), { images, status: images.length === imageRequest.numberOfImages ? ImageRequestStatus.TO_REVIEW : ImageRequestStatus.IN_PROGRESS });
+        return Object.assign(Object.assign({}, imageRequest), { images, status: images.length === imageRequest.numberOfImages ? enums_1.ImageRequestStatus.TO_REVIEW : enums_1.ImageRequestStatus.IN_PROGRESS });
     }));
 };
 const addImages = (imageRequest, ids) => {
@@ -126,20 +86,10 @@ const setPrompt = (imageRequest, prompt) => {
 };
 const canGenerateImage = (imageRequest) => {
     if (imageRequest.prompt === undefined) {
-        return (0, Either_1.left)(daedelium_1.Miscue.create({
-            code: daedelium_1.MiscueCode.IMAGE_REQUEST_PROMPT_NOT_SET,
-            message: 'Prompt is undefined',
-            timestamp: Date.now(),
-            details: `Prompt is undefined for image request with id ${imageRequest.id}`
-        }));
+        return (0, Either_1.left)((0, miscue_1.PromptNotSetMiscue)(imageRequest.id));
     }
-    if (imageRequest.status !== ImageRequestStatus.PENDING && imageRequest.status !== ImageRequestStatus.IN_PROGRESS) {
-        return (0, Either_1.left)(daedelium_1.Miscue.create({
-            code: daedelium_1.MiscueCode.IMAGE_REQUEST_INVALID_STATUS,
-            message: 'Image request status is invalid',
-            timestamp: Date.now(),
-            details: `Image request with id ${imageRequest.id} has status ${imageRequest.status}`
-        }));
+    if (imageRequest.status !== enums_1.ImageRequestStatus.PENDING && imageRequest.status !== enums_1.ImageRequestStatus.IN_PROGRESS) {
+        return (0, Either_1.left)((0, miscue_1.RequestInvalidStatusMiscue)(imageRequest.id, imageRequest.status));
     }
     return (0, Either_1.right)(imageRequest);
 };

@@ -1,6 +1,7 @@
-import { ImageRequestDto, ImageRequestStatus } from "@turtleshell/zeus";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Miscue } from "@turtleshell/daedelium";
+import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-request/dtos";
+import { ImageRequestStatus } from "@turtleshell/asgard/build/aggregate/image-request/enums";
 type GetAllParams = {
     limit?: number;
     status?: ImageRequestStatus;

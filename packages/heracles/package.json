@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@turtleshell/zeus": "file:../zeus",
+    "@turtleshell/asgard": "file:../asgard",
     "@turtleshell/daedelium": "file:../daedelium",
     "ts-node": "^10.9.1"
   },

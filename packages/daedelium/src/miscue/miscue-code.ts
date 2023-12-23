@@ -6,6 +6,7 @@ export const MiscueCodeEnum = t.keyof({
     'ir-0002': null,
     'ir-0003': null,
     'ir-0004': null,
+    'ir-0005' : null,
 
     'i-0000': null,
     '1000': null,
@@ -67,6 +68,8 @@ export enum MiscueCode {
     IMAGE_REQUEST_INVALID_STATUS    = 'ir-0002',
     IMAGE_REQUEST_DATABASE_SAVE_ERROR = 'ir-0003',
     IMAGE_REQUEST_NOT_FOUND_ERROR   = 'ir-0004',
+
+    IMAGE_REQUEST_CRON_NO_REQUEST_AVAILABLE = 'ir-0005',
     IMAGE_CREATTNG_ERROR            = 'i-0000',
 
     MIDJOURNEY_CLIENT_ERROR = 'm-0003',

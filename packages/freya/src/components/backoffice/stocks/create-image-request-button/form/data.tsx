@@ -1,3 +1,8 @@
+import { Miscue } from '@turtleshell/daedelium';
+
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/function';
+
 
 export enum ImageStyle {
     BLACK_AND_WHITE_ILLUSTRATION = "black_and_white_illustration",
@@ -30,29 +35,25 @@ export type FormSchema = z.infer<typeof schema>;
 type OnSubmitParams = {
     toast: (params: { description: string, variant?: "default" | "destructive" }) => void
     closeModal: () => void
-    createImageRequest: (values: FormSchema) => Promise<{
-        serverError?: string
-        data?: string
-    }>
-
+    createImageRequest: (values: FormSchema) => Promise<E.Either<Miscue, string>>
 }
-export const onSubmit = ({toast, closeModal, createImageRequest}: OnSubmitParams) => async (values: FormSchema) => {
-    console.log(values)
+export const onSubmit = ({toast, createImageRequest, closeModal }: OnSubmitParams) => async (values: FormSchema) => {
     const result = await createImageRequest(values);
-
-    if (result.serverError) {
-        console.log(result.serverError)
-        toast({
-            description: result.serverError,
-            variant: "destructive"
+    pipe(
+        result,
+        E.map((data) => {
+            closeModal()
+            toast({
+                description: data,
+            })
+        }),
+        E.mapLeft((miscue) => {
+            console.log(miscue)
+            closeModal()
+            toast({
+                description: miscue.message,
+                variant: "destructive"
+            })
         })
-    }
-
-    if (result.data) {
-        console.log(result.data)
-        toast({
-            description: result.data,
-        })
-    }
-    closeModal()
+    )
 }

@@ -16,7 +16,7 @@ export const getS3Client = (): E.Either<Miscue, S3>  => {
     const env = get(process.env);
     return pipe(
         E.bindTo('accessKeyId')(env<string>('AWS_ACCESS_KEY_ID')),
-        E.bind('secretAccessKey', () => env<string>('Aws_SECRET_ACCESS_KEY')),
+        E.bind('secretAccessKey', () => env<string>('AWS_SECRET_ACCESS_KEY')),
         E.bind('region', () => env<string>('AWS_REGION')),
         E.map(({ accessKeyId, secretAccessKey, region }) => { 
             s3client = new S3({

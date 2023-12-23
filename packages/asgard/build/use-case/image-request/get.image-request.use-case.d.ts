@@ -1,6 +1,6 @@
-import { ImageRequestDto } from "../../aggregate/image-request/image-request";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Miscue } from "@turtleshell/daedelium";
+import { ImageRequestDto } from "../../aggregate/image-request/dtos";
 type Context = {
     getById: (imageRequestId: string) => TE.TaskEither<Miscue, ImageRequestDto>;
     createPresignedUrl: (key: string) => TE.TaskEither<Miscue, string>;

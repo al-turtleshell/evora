@@ -30,6 +30,6 @@ const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const t = __importStar(require("io-ts"));
 const daedelium_1 = require("@turtleshell/daedelium");
 const generateImageImageRequestUsecase = ({ getById, generateImage, save }) => (imageRequestId) => {
-    return (0, function_1.pipe)((0, daedelium_1.decode)(t.string, imageRequestId), TE.fromEither, TE.chain(getById), TE.chainEitherK(image_request_1.ImageRequest.create), TE.chain(imageRequest => (0, function_1.pipe)(image_request_1.ImageRequest.canGenerateImage(imageRequest), TE.fromEither, TE.chain(imageRequest => (0, function_1.pipe)(generateImage(imageRequest.prompt), TE.chainEitherK(ids => image_request_1.ImageRequest.addImages(imageRequest, ids)))))), TE.map(image_request_1.ImageRequest.toDto), TE.chain(save));
+    return (0, function_1.pipe)((0, daedelium_1.decode)(t.string, imageRequestId), TE.fromEither, TE.chain(getById), TE.chainEitherK(image_request_1.ImageRequest.create), TE.chain(imageRequest => (0, function_1.pipe)(image_request_1.ImageRequest.canGenerateImage(imageRequest), TE.fromEither, TE.chain(imageRequest => (0, function_1.pipe)(generateImage(imageRequest.prompt), TE.chainEitherK(ids => image_request_1.ImageRequest.addImages(imageRequest, ids)))))), TE.chainEitherK(image_request_1.ImageRequest.toDto), TE.chain(save));
 };
 exports.generateImageImageRequestUsecase = generateImageImageRequestUsecase;

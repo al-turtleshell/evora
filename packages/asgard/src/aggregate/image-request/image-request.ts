@@ -1,70 +1,14 @@
 import * as t from 'io-ts';
-import { CreateImageDto, ImageDto, ImageStyleEnum, Image, ImageCodec } from './image';
-
+import {  Image, ImageCodec } from './image';
 import { Either, map, left, right, chain } from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
-
 import { v4 as uuid } from 'uuid';
 import { pipe } from 'fp-ts/lib/function';
-
 import { Miscue, MiscueCode, UUID, decode } from '@turtleshell/daedelium';
-
-export enum ImageRequestStatus {
-    PENDING = 'pending',
-    IN_PROGRESS = 'in_progress',
-    TO_REVIEW = 'to_review',
-    COMPLETED = 'completed'
-}
-
-export const ImageRequestStatusEnum = t.keyof({
-    pending: null,
-    in_progress: null,
-    to_review: null,
-    completed: null
-});
-
-export const CreateImageRequestDto = t.intersection([
-    t.type({
-        numberOfImages: t.number,
-        style: t.string,
-        description: t.string
-    }),
-    t.partial({
-        id: t.string,
-        status: t.string,
-        prompt: t.string,
-        images: t.array(CreateImageDto),
-    })
-]);
-
-export type CreateImageRequestDto = t.TypeOf<typeof CreateImageRequestDto>;
-
-const ImageRequestDto = t.intersection([
-    t.type({
-        id: t.string,
-        status: t.string,
-        images: t.array(ImageDto),
-        numberOfImages: t.number,
-        style: t.string,
-        description: t.string
-    }),
-    t.partial({
-        prompt: t.string,
-    })
-]);
-
-export type ImageRequestDto = t.TypeOf<typeof ImageRequestDto>;
-
-
-const isNumberOfImages = (n: unknown): n is number => 
-  typeof n === 'number' && n % 4 === 0 && n > 0;
-
-const NumberOfImages = new t.Type<number, number, unknown>(
-  'NumberOfImages',
-  isNumberOfImages,
-  (input, context) => isNumberOfImages(input) ? t.success(input) : t.failure(input, context),
-  t.identity
-);
+import { ImageRequestStatus, ImageRequestStatusEnum, ImageStyleEnum } from './enums';
+import { NumberOfImages } from './types';
+import { CreateImageRequestDto, ImageRequestDto } from './dtos';
+import { ImageRequestCreatingErrorMiscue, PromptNotSetMiscue, RequestInvalidStatusMiscue } from '../../miscue';
 
 const ImageRequestCodec = t.intersection([
     t.type({
@@ -93,17 +37,16 @@ const create = ({id, numberOfImages, style, description, images, prompt, status}
         status: status ?? ImageRequestStatus.PENDING,
         images: images ?? []
         },
-        (details?: string) => Miscue.create({
-            code: MiscueCode.IMAGE_REQUEST_CREATING_ERROR,
-            message: 'Image request creating failed',
-            timestamp: Date.now(),
-            details,
-        })
+        ImageRequestCreatingErrorMiscue
     );
 }
 
-const toDto = (imageRequest: ImageRequest): ImageRequestDto => {
-    return {
+const toDto = (imageRequest: ImageRequest): Either<Miscue, ImageRequestDto> => {
+    if (imageRequest.prompt === undefined) {
+        return left(PromptNotSetMiscue(imageRequest.id));
+    }
+
+    return right({
         id: imageRequest.id,
         status: imageRequest.status,
         images: imageRequest.images.map(image => Image.toDto(image)),
@@ -111,7 +54,7 @@ const toDto = (imageRequest: ImageRequest): ImageRequestDto => {
         style: imageRequest.style,
         description: imageRequest.description,
         prompt: imageRequest.prompt,
-    }
+    });
 }
 
 const addImage = (imageRequest: ImageRequest, id: string): Either<Miscue, ImageRequest> => {
@@ -146,21 +89,11 @@ const setPrompt = (imageRequest: ImageRequest, prompt: string): ImageRequest => 
 const canGenerateImage = (imageRequest: ImageRequest): Either<Miscue, ImageRequest> => {
 
     if (imageRequest.prompt === undefined) {
-        return left(Miscue.create({
-            code: MiscueCode.IMAGE_REQUEST_PROMPT_NOT_SET,
-            message: 'Prompt is undefined',
-            timestamp: Date.now(),
-            details: `Prompt is undefined for image request with id ${imageRequest.id}`
-        }));
+        return left(PromptNotSetMiscue(imageRequest.id));
     }
 
     if (imageRequest.status !== ImageRequestStatus.PENDING && imageRequest.status !== ImageRequestStatus.IN_PROGRESS) {
-        return left(Miscue.create({
-            code: MiscueCode.IMAGE_REQUEST_INVALID_STATUS,
-            message: 'Image request status is invalid',
-            timestamp: Date.now(),
-            details: `Image request with id ${imageRequest.id} has status ${imageRequest.status}`
-        }));
+        return left(RequestInvalidStatusMiscue(imageRequest.id, imageRequest.status));
     }
 
     return right(imageRequest);
@@ -182,6 +115,7 @@ const generateImageUrl = (imageRequest: ImageRequest, createPresignedUrl: (key: 
         }))
     );
 }
+
 export const ImageRequest = {
     create,
     toDto,

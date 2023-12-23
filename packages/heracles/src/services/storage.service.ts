@@ -47,6 +47,7 @@ type StorageService = {
     createPresignedUrl: (key: string) => TE.TaskEither<Miscue, string>
     storeImages: (imageKeys: string[]) => TE.TaskEither<Miscue, string[]>
 }
+
 export const createStorageService = (s3: S3, bucketName: string, path: string):  StorageService => { 
     const storeImages = (imageKeys: string[]): TE.TaskEither<Miscue, string[]> => {
         const storeImageS3 = storeImage(s3, bucketName, path);

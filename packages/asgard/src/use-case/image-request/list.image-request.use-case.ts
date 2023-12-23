@@ -1,10 +1,12 @@
 import { pipe } from "fp-ts/lib/function";
-import { ImageRequestDto, ImageRequestStatusEnum } from "../../aggregate/image-request/image-request";
+
 
 import * as TE from 'fp-ts/lib/TaskEither';
 
 import * as t from 'io-ts';
 import { Miscue, decode } from "@turtleshell/daedelium";
+import { ImageRequestStatusEnum } from "../../aggregate/image-request/enums";
+import { ImageRequestDto } from "../../aggregate/image-request/dtos";
 
 type Context = {
     getAll: ({ limit, status, skip }: Params) => TE.TaskEither<Miscue, ImageRequestDto[]>;

@@ -30,6 +30,6 @@ const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const t = __importStar(require("io-ts"));
 const daedelium_1 = require("@turtleshell/daedelium");
 const getImageRequestUsecase = ({ getById, createPresignedUrl }) => (imageRequestId) => {
-    return (0, function_1.pipe)((0, daedelium_1.decode)(t.string, imageRequestId), TE.fromEither, TE.chain(getById), TE.chainEitherK(image_request_1.ImageRequest.create), TE.chain(imageRequest => image_request_1.ImageRequest.generateImageUrl(imageRequest, createPresignedUrl)), TE.map(image_request_1.ImageRequest.toDto));
+    return (0, function_1.pipe)((0, daedelium_1.decode)(t.string, imageRequestId), TE.fromEither, TE.chain(getById), TE.chainEitherK(image_request_1.ImageRequest.create), TE.chain(imageRequest => image_request_1.ImageRequest.generateImageUrl(imageRequest, createPresignedUrl)), TE.chainEitherK(image_request_1.ImageRequest.toDto));
 };
 exports.getImageRequestUsecase = getImageRequestUsecase;

@@ -25,13 +25,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listImageRequestUsecase = void 0;
 const function_1 = require("fp-ts/lib/function");
-const image_request_1 = require("../../aggregate/image-request/image-request");
 const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const t = __importStar(require("io-ts"));
 const daedelium_1 = require("@turtleshell/daedelium");
+const enums_1 = require("../../aggregate/image-request/enums");
 const schema = t.partial({
     limit: t.number,
-    status: image_request_1.ImageRequestStatusEnum,
+    status: enums_1.ImageRequestStatusEnum,
     skip: t.number,
 });
 const listImageRequestUsecase = ({ getAll }) => (params) => {

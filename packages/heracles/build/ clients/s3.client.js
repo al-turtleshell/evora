@@ -39,7 +39,7 @@ const getS3Client = () => {
         return E.right(s3client);
     }
     const env = (0, daedelium_1.get)(process.env);
-    return (0, function_1.pipe)(E.bindTo('accessKeyId')(env('AWS_ACCESS_KEY_ID')), E.bind('secretAccessKey', () => env('Aws_SECRET_ACCESS_KEY')), E.bind('region', () => env('AWS_REGION')), E.map(({ accessKeyId, secretAccessKey, region }) => {
+    return (0, function_1.pipe)(E.bindTo('accessKeyId')(env('AWS_ACCESS_KEY_ID')), E.bind('secretAccessKey', () => env('AWS_SECRET_ACCESS_KEY')), E.bind('region', () => env('AWS_REGION')), E.map(({ accessKeyId, secretAccessKey, region }) => {
         s3client = new client_s3_1.S3({
             credentials: {
                 accessKeyId,

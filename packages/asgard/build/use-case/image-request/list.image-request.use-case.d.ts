@@ -1,7 +1,7 @@
-import { ImageRequestDto } from "../../aggregate/image-request/image-request";
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as t from 'io-ts';
 import { Miscue } from "@turtleshell/daedelium";
+import { ImageRequestDto } from "../../aggregate/image-request/dtos";
 type Context = {
     getAll: ({ limit, status, skip }: Params) => TE.TaskEither<Miscue, ImageRequestDto[]>;
 };

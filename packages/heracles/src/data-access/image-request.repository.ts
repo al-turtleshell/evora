@@ -1,10 +1,11 @@
-import { ImageRequestDto, ImageRequestStatus } from "@turtleshell/zeus";
+
 import { getPrismaClient } from "../ clients/prisma.client";
-import {  ImageStatus, ImageStyle } from "@prisma/client";
+
 
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Miscue, MiscueCode } from "@turtleshell/daedelium";
-
+import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-request/dtos";
+import { ImageStyle, ImageRequestStatus, ImageStatus } from "@turtleshell/asgard/build/aggregate/image-request/enums";
 
 const prisma = getPrismaClient();
 const save = (imageRequest: ImageRequestDto): TE.TaskEither<Miscue, ImageRequestDto> => 

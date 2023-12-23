@@ -70,10 +70,9 @@ const sendImagineCommand = (midjourneyBotId) => (channel, prompt) => {
 };
 const generateImage = (selectChannel, setChannelAsBusy, sendImagineCommand, waitForImageCompletion, downloadImage, cutIntoQuadrant, storeImages, cleanUp, setChannelAsFree) => (prompt) => {
     const id = (0, uuid_1.v4)();
-    return (0, function_1.pipe)(selectChannel(), TE.chain(channel => (0, function_1.pipe)(TE.bindTo('_1')(setChannelAsBusy(channel.id)), TE.bind('_2', () => sendImagineCommand(channel, prompt)), TE.bind('url', () => waitForImageCompletion(channel)), TE.bind('_3', ({ url }) => downloadImage(url, `/preview_${id}.png`)), TE.bind('uuids', () => cutIntoQuadrant(`./preview_${id}.png`)), TE.bind('_4', ({ uuids }) => storeImages(uuids)), TE.bind('_5', ({ uuids }) => cleanUp(id, uuids)), TE.bind('_6', () => setChannelAsFree(channel.id)), TE.map(({ uuids }) => uuids), TE.mapLeft(miscue => { console.log('HERE'); setChannelAsFree(channel.id)(); console.log(miscue); return miscue; }))));
+    return (0, function_1.pipe)(selectChannel(), TE.chain(channel => (0, function_1.pipe)(TE.bindTo('_1')(setChannelAsBusy(channel.id)), TE.bind('_2', () => sendImagineCommand(channel, prompt)), TE.bind('url', () => waitForImageCompletion(channel)), TE.bind('_3', ({ url }) => downloadImage(url, `/preview_${id}.png`)), TE.bind('uuids', () => cutIntoQuadrant(`./preview_${id}.png`)), TE.bind('_4', ({ uuids }) => storeImages(uuids)), TE.bind('_5', ({ uuids }) => cleanUp(id, uuids)), TE.bind('_6', () => setChannelAsFree(channel.id)), TE.map(({ uuids }) => uuids), TE.mapLeft(miscue => { setChannelAsFree(channel.id)(); return miscue; }))));
 };
 const createImageGenerationService = (discordClient, storeImages, repository, midjourneyBotId, path) => {
-    console.log('Generating image generation service');
     return (0, function_1.pipe)(repository.getAllChannel(), TE.chain(channels => {
         return TE.sequenceArray(channels.map(channel => TE.tryCatch(() => discordClient.channels.fetch(channel.id), reason => daedelium_1.Miscue.create({
             code: daedelium_1.MiscueCode.IMAGE_GENERATION_SERVICE_CHANNEL_FETCH_ERROR,
