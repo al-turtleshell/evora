@@ -1,11 +1,10 @@
-import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-request/image-request";
-
-
 import * as TE from 'fp-ts/lib/TaskEither';
 import { v4 as uuid } from 'uuid';
 import { listImageRequestUsecase } from '@turtleshell/asgard/build/use-case/image-request/list.image-request.use-case';
 import { pipe } from "fp-ts/lib/function";
 import { Miscue } from "@turtleshell/daedelium";
+import { ImageRequestDto } from '@turtleshell/asgard/build/aggregate/image-request/dtos';
+
 const getAllFn = (): TE.TaskEither<Miscue, ImageRequestDto[]> => {
     return TE.right([{
         id: uuid(),

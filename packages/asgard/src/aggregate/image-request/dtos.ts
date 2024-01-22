@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { ImageRequestProject } from './enums';
 
 export const ImageDto = t.intersection([
     t.type({
@@ -24,7 +25,8 @@ export const CreateImageRequestDto = t.intersection([
     t.type({
         numberOfImages: t.number,
         style: t.string,
-        description: t.string
+        description: t.string,
+        project: t.string,
     }),
     t.partial({
         id: t.string,
@@ -36,10 +38,11 @@ export const CreateImageRequestDto = t.intersection([
 
 export type CreateImageRequestDto = t.TypeOf<typeof CreateImageRequestDto>;
 
-const ImageRequestDto = 
+export const ImageRequestDto = 
     t.type({
         id: t.string,
         status: t.string,
+        project: t.string,
         images: t.array(ImageDto),
         numberOfImages: t.number,
         style: t.string,

@@ -23,7 +23,9 @@ export const generateImageImageRequestUsecase = ({ getById, generateImage, save 
             ImageRequest.canGenerateImage(imageRequest),
             TE.fromEither,
             TE.chain(imageRequest => pipe(
-                generateImage(imageRequest.prompt as string),
+                (() => { 
+                    return generateImage(imageRequest.prompt as string)
+                })(),
                 TE.chainEitherK(ids => ImageRequest.addImages(imageRequest, ids)),
             )),
         )),

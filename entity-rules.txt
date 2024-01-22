@@ -1,0 +1,29 @@
+== DEV SPECIFICATION ==
+- only write function
+
+== TYPE ==
+- every type should use io-ts library.
+- optional type should be created with t.intersection, t.type and t.partial
+
+
+=== ENTITY RULES ===
+    == ATTRIBUTES == 
+        - an entity must have at least two DTOs and self type:
+            - CreateEntityDto 
+            - EntityDto
+            - Entity
+        - DTo should be created with primitive type as t.string, t.number
+
+        - entity data consists of attributes that will be presented as an array of JSON object :
+            [
+                {
+                    name: "name of attribute",
+                    primitive: "primitive type",
+                    type: "current type",
+                    condition: "condition to satisfy that type",
+                    enum: "an array with enum values in case of enum type"
+                    required: "boolean"
+                }
+            ]
+
+

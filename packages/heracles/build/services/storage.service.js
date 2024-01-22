@@ -35,7 +35,7 @@ const function_1 = require("fp-ts/lib/function");
 const fs_1 = __importDefault(require("fs"));
 const createPresignedUrl = (s3, bucket) => (key) => TE.tryCatch(() => {
     {
-        const command = new client_s3_1.PutObjectCommand({ Bucket: bucket, Key: key });
+        const command = new client_s3_1.GetObjectCommand({ Bucket: bucket, Key: key });
         return (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 18000 });
     }
     ;

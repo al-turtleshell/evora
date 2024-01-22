@@ -18,3 +18,4 @@ __exportStar(require("./create.image-request.use-case"), exports);
 __exportStar(require("./generate-image.image-request.use-case"), exports);
 __exportStar(require("./get.image-request.use-case"), exports);
 __exportStar(require("./list.image-request.use-case"), exports);
+__exportStar(require("./review.image-request.use-case"), exports);

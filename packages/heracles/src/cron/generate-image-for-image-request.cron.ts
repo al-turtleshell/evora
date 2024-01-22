@@ -2,8 +2,8 @@ import { pipe } from "fp-ts/lib/function"
 import { ImageRequestRepository, MidjourneyChannelRepository } from "../data-access"
 import * as TE from 'fp-ts/lib/TaskEither';
 import { loadConfiguration } from "../configuration.loader";
-import { getDiscordClient } from "../ clients/discord.client";
-import { getS3Client } from "../ clients/s3.client";
+import { getDiscordClient } from "../clients/discord.client";
+import { getS3Client } from "../clients/s3.client";
 import { createImageGenerationService, createStorageService } from "../services";
 import { generateImageImageRequestUsecase } from "@turtleshell/asgard";
 import { ImageRequestStatus } from "@turtleshell/asgard/build/aggregate/image-request/enums";
@@ -28,17 +28,12 @@ const launch = () => {
             configuration.midjourneyBotId, 
             configuration.imageFolder
         )),
-        TE.bind('imageRequestDtosInProgress', () => ImageRequestRepository.getAll({ limit: 10, status: ImageRequestStatus.IN_PROGRESS, skip: 0 })),
-        TE.bind('imageRequestDtosPending', () => ImageRequestRepository.getAll({ limit: 10, status: ImageRequestStatus.PENDING, skip: 0 })),
-        TE.bind('nextImageRequestDto', ({ imageRequestDtosInProgress, imageRequestDtosPending }) => {
-            if (imageRequestDtosInProgress.length > 0) { 
-                return TE.right(imageRequestDtosInProgress[0])
+        TE.bind('imageRequestToProcess', () => ImageRequestRepository.getAll({ limit: 5, status: [ImageRequestStatus.IN_PROGRESS, ImageRequestStatus.PENDING], skip: 0 })),
+        TE.bind('nextImageRequestDto', ({ imageRequestToProcess }) => {
+            if (imageRequestToProcess.length > 0) {
+                return TE.right(imageRequestToProcess[0])
             }
 
-            if (imageRequestDtosPending.length > 0) {
-                return TE.right(imageRequestDtosPending[0])
-            }
- 
             return TE.left(Miscue.create({
                 code: MiscueCode.IMAGE_REQUEST_CRON_NO_REQUEST_AVAILABLE,
                 message: "No image request available",
@@ -56,9 +51,7 @@ const launch = () => {
     
 }
 
-cron.schedule('*/3 * * * *', () => {
-    console.log('started');
+cron.schedule('*/2 * * * *', () => {
     launch()
 });
 
-//launch();

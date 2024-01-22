@@ -14,7 +14,7 @@ import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-reque
 
 const schema = t.partial({
     limit: t.number,
-    status: ImageRequestStatusEnum,
+    status: t.array(ImageRequestStatusEnum),
     skip: t.number
 })
 

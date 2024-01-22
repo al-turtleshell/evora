@@ -1,5 +1,5 @@
 
-import { getPrismaClient } from "../ clients/prisma.client";
+import { getPrismaClient } from "../clients/prisma.client";
 
 
 import * as TE from 'fp-ts/lib/TaskEither';
@@ -22,28 +22,39 @@ const save = (imageRequest: ImageRequestDto): TE.TaskEither<Miscue, ImageRequest
                 });
             
                 if (exist) {
-                    await prisma.imageRequest.update({
-                        where: {
-                            id: imageRequest.id
-                        },
-                        data: {
-                            numberOfImages: imageRequest.numberOfImages,
-                            style: imageRequest.style as ImageStyle,
-                            description: imageRequest.description,
-                            prompt: imageRequest.prompt,
-                            status: imageRequest.status as ImageRequestStatus
-                        }
-                    });
+                    // await prisma.imageRequest.update({
+                    //     where: {
+                    //         id: imageRequest.id
+                    //     },
+                    //     data: {
+                    //         numberOfImages: imageRequest.numberOfImages,
+                    //         style: imageRequest.style as ImageStyle,
+                    //         description: imageRequest.description,
+                    //         prompt: imageRequest.prompt,
+                    //         status: imageRequest.status as ImageRequestStatus
+                    //     }
+                    // });
 
-                    await prisma.image.createMany({
-                        data: imageRequest.images.map(image => ({
-                            id: image.id,
-                            imageRequestId: imageRequest.id,
-                            status: image.status as ImageStatus
-                        }))
+                    // await prisma.image.createMany({
+                    //     data: imageRequest.images.map(image => ({
+                    //         id: image.id,
+                    //         imageRequestId: imageRequest.id,
+                    //         status: image.status as ImageStatus
+                    //     }))
+                    // })
+
+                    // return;
+                    await prisma.image.deleteMany({
+                        where: {
+                            imageRequestId: imageRequest.id
+                        }
                     })
 
-                    return;
+                    await prisma.imageRequest.delete({
+                        where: {
+                            id: imageRequest.id
+                        }
+                    })
                 }
                 
                 await prisma.imageRequest.create({
@@ -53,6 +64,7 @@ const save = (imageRequest: ImageRequestDto): TE.TaskEither<Miscue, ImageRequest
                         style: imageRequest.style as ImageStyle,
                         description: imageRequest.description,
                         prompt: imageRequest.prompt,
+                        status: imageRequest.status as ImageRequestStatus,
                     }
                 });
         
@@ -102,7 +114,7 @@ const getById = (id: string): TE.TaskEither<Miscue, ImageRequestDto> => {
 
 type GetAllParams = {
     limit?: number,
-    status?: ImageRequestStatus,
+    status?: ImageRequestStatus[],
     skip?: number
 }
 const getAll = ({limit, status, skip}: GetAllParams): TE.TaskEither<Miscue, ImageRequestDto[]> => {
@@ -113,7 +125,7 @@ const getAll = ({limit, status, skip}: GetAllParams): TE.TaskEither<Miscue, Imag
                     images: true
                 }, 
                 where: {
-                    status: status ?? undefined,
+                    OR: status ? status.map(s => ({ status: s })) : undefined
                 },
                 take: limit ?? undefined,
                 skip: skip ?? 0
@@ -126,13 +138,36 @@ const getAll = ({limit, status, skip}: GetAllParams): TE.TaskEither<Miscue, Imag
             details: `Database error ${reason}`
         })
     )
-
 }
 
+const getImageRequestToReview = (): TE.TaskEither<Miscue, ImageRequestDto[]> => {
+    return TE.tryCatch(
+        async () => {
+            return await prisma.imageRequest.findMany({
+                include: {
+                    images: true
+                }, 
+                where: {
+                    OR: [
+                        { status: ImageRequestStatus.TO_REVIEW },
+                        { status: ImageRequestStatus.IN_PROGRESS }
+                    ]
+                },
+            });
+        },
+        (reason) => Miscue.create({
+            code: MiscueCode.DATABASE_ERROR,
+            message: 'Database error',
+            timestamp: Date.now(),
+            details: `Database error ${reason}`
+        })
+    )
+}
 export const ImageRequestRepository = {
     save,
     getById,
-    getAll
+    getAll,
+    getImageRequestToReview
 }
 
 export type ImageRequestRepository = typeof ImageRequestRepository;

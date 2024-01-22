@@ -14,6 +14,17 @@ export const ImageRequestStatusEnum = t.keyof({
     completed: null
 });
 
+export enum ImageRequestProject {
+    INSTAGRAM = 'instagram',
+    ADOBE_STOCK = 'adobe_stock',
+    YT_SHORT = 'youtube_short',
+}
+
+export const ImageRequestProjectEnum = t.keyof({
+   instagram: null,
+   adobe_stock: null,
+   yt_short: null,
+})
 
 export enum ImageStyle {
     BLACK_AND_WHITE_ILLUSTRATION = 'black_and_white_illustration',

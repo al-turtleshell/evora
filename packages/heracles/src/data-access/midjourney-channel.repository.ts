@@ -1,4 +1,4 @@
-import { getPrismaClient } from "../ clients/prisma.client";
+import { getPrismaClient } from "../clients/prisma.client";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { Miscue, MiscueCode } from "@turtleshell/daedelium";
 const prisma = getPrismaClient();

@@ -57,6 +57,20 @@ const sendImagineCommand = (midjourneyBotId: string) => (channel: TextChannel, p
     )
 }
 
+const deleteMessage = (channel: TextChannel): TE.TaskEither<Miscue, unknown> => {
+    return pipe(
+        TE.tryCatch(
+            () => channel.messages.fetch({ limit: 1 }),
+            () => Miscue.create({
+                code: MiscueCode.IMAGE_GENERATION_ERROR,
+                message: 'There was an issue while deleting the message',
+                timestamp: Date.now(),
+            })
+        ),
+        TE.map(messages => messages.first()?.delete()),
+
+    )
+}
 
 const generateImage = (
     selectChannel: () => TE.TaskEither<Miscue, TextChannel>,
@@ -67,6 +81,7 @@ const generateImage = (
     cutIntoQuadrant: (inputPath: string) => TE.TaskEither<Miscue, string[]>,
     storeImages: (paths: string[]) => TE.TaskEither<Miscue, string[]>,
     cleanUp: (preview_id: string, uuids: string[]) => TE.TaskEither<Miscue, string[]>,
+    deleteMessage: (channel: TextChannel) => TE.TaskEither<Miscue, unknown>,
     setChannelAsFree: (channelId: string) => TE.TaskEither<Miscue, unknown>,
 ) => (prompt: string): TE.TaskEither<Miscue, string[]> => {
     const id = uuid();
@@ -81,8 +96,9 @@ const generateImage = (
             TE.bind('_4',               ({ uuids })     => storeImages(uuids)),
             TE.bind('_5',               ({ uuids })     => cleanUp(id, uuids)),
             TE.bind('_6',               ()              => setChannelAsFree(channel.id)),
+            TE.bind('_7',               ()              => deleteMessage(channel)),
             TE.map(                     ({ uuids })     => uuids),
-            TE.mapLeft(                 miscue          => { setChannelAsFree(channel.id)(); return miscue; })
+            TE.mapLeft(                 miscue          => { setChannelAsFree(channel.id)(); deleteMessage(channel); return miscue; })
         ))
     );
 }
@@ -129,15 +145,31 @@ export const createImageGenerationService = (
                                     timestamp: Date.now(),
                                 })
                             ),
-                            TE.map(messages => messages.first()?.attachments?.first()?.url),
+                            TE.map(messages => messages.first()),
                         )
                     ,
-                    (url) => url !== undefined,
+                    (message) => {
+                        if (!message) {
+                            return false;
+                        }
+
+                        const attachment = message.attachments?.first()?.url;
+                        if (!attachment) {
+                            return false;
+                        }
+
+                        const content = message.content;
+                        if (content.includes('%)')) {
+                            return false;
+                        }
+
+                        return true;
+                    },
                     5,
                     15000,
                     'check image completion'
                 ),
-                TE.map(url => url as string)
+                TE.map(message => message?.attachments?.first()?.url as string)
             );
             
             return {
@@ -150,6 +182,7 @@ export const createImageGenerationService = (
                     cutIntoQuadrant(path),
                     storeImages,
                     cleanUp(path),
+                    deleteMessage,
                     setChannelAsFree(repository)
                 )
             }

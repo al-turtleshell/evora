@@ -1,12 +1,14 @@
 
-import { ImageRequestDto, ImageRequestStatus } from '@turtleshell/asgard/build/aggregate/image-request/image-request';
+
 
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { v4 as uuid } from 'uuid';
 import { getImageRequestUsecase } from '@turtleshell/asgard/build/use-case/image-request/get.image-request.use-case';
-import { ImageStatus } from '@turtleshell/asgard/build/aggregate/image-request/image';
+
 import { Miscue, MiscueCode } from '@turtleshell/daedelium';
+import { ImageRequestDto } from '@turtleshell/asgard/build/aggregate/image-request/dtos';
+import { ImageStatus, ImageRequestStatus } from '@turtleshell/asgard/build/aggregate/image-request/enums';
 
 const getByIdFnSuccess = (imageRequestId: string): TE.TaskEither<Miscue, ImageRequestDto> => {
     return TE.right({
@@ -42,7 +44,7 @@ const createPresignedUrlFnSuccess = (key: string): TE.TaskEither<Miscue, string>
 
 const createPresignedUrlFnFailed = (key: string): TE.TaskEither<Miscue, string> => {
     return TE.left(Miscue.create({
-        code: MiscueCode.S3_PRESIGNED_GENERATION_ERROR,
+        code: MiscueCode.S3_PRESIGNED_URL_GENERATION_ERROR,
         message: 'Cannot create presigned url',
         timestamp: Date.now(),
         details: `S3 error for key ${key}`,
@@ -68,7 +70,7 @@ describe('Use case error path', () => {
         pipe(
             getImageRequestUsecase({ getById: getByIdFnSuccess, createPresignedUrl: createPresignedUrlFnFailed })(uuid()),
             TE.mapLeft(miscue => { 
-                expect(miscue.code).toBe(MiscueCode.S3_PRESIGNED_GENERATION_ERROR);
+                expect(miscue.code).toBe(MiscueCode.S3_PRESIGNED_URL_GENERATION_ERROR);
     
                 expect(miscue.timestamp).toBeDefined();
             }),

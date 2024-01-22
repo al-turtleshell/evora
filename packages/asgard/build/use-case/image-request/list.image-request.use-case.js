@@ -29,12 +29,16 @@ const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const t = __importStar(require("io-ts"));
 const daedelium_1 = require("@turtleshell/daedelium");
 const enums_1 = require("../../aggregate/image-request/enums");
+const aggregate_1 = require("../../aggregate");
 const schema = t.partial({
     limit: t.number,
-    status: enums_1.ImageRequestStatusEnum,
+    status: t.array(enums_1.ImageRequestStatusEnum),
     skip: t.number,
 });
-const listImageRequestUsecase = ({ getAll }) => (params) => {
-    return (0, function_1.pipe)((0, daedelium_1.decode)(schema, params), TE.fromEither, TE.chain(getAll));
+const listImageRequestUsecase = ({ getAll, createPresignedUrl }) => (params) => {
+    if (!createPresignedUrl) {
+        return (0, function_1.pipe)((0, daedelium_1.decode)(schema, params), TE.fromEither, TE.chain(getAll));
+    }
+    return (0, function_1.pipe)((0, daedelium_1.decode)(schema, params), TE.fromEither, TE.chain(getAll), TE.chain(imageRequestDtos => TE.traverseArray((imageRequestDto) => (0, function_1.pipe)(TE.fromEither(aggregate_1.ImageRequest.create(imageRequestDto)), TE.chain(imageRequest => aggregate_1.ImageRequest.generateImageUrl(imageRequest, createPresignedUrl))))(imageRequestDtos)), TE.chain(imageRequests => TE.traverseArray((imageRequest) => TE.fromEither(aggregate_1.ImageRequest.toDto(imageRequest)))(imageRequests)), TE.map(imageRequestDtos => Array.from(imageRequestDtos)));
 };
 exports.listImageRequestUsecase = listImageRequestUsecase;

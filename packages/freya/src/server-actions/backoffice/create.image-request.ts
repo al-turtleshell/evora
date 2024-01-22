@@ -14,7 +14,8 @@ import { revalidatePath } from 'next/cache';
 const schema = t.type({
     numberOfImages: t.string,
     description: t.string,
-    style: ImageStyleEnum
+    style: ImageStyleEnum,
+    project: t.string
 })
 
 

@@ -1,5 +1,6 @@
 import { Image } from '@turtleshell/asgard'
-import { ImageStatus } from '@turtleshell/asgard/build/aggregate/image-request/image';
+
+import { ImageStatus } from '@turtleshell/asgard/build/aggregate/image-request/enums';
 import { map } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { v4 as uuid } from 'uuid';

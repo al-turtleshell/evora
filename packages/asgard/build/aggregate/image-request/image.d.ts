@@ -17,5 +17,7 @@ export declare const Image: {
     create: ({ id, status }: CreateImageDto) => Either<Miscue, Image>;
     toDto: (image: Image) => ImageDto;
     addUrl: (image: Image, url: string) => Image;
+    accept: (image: Image) => Image;
+    reject: (image: Image) => Image;
 };
 //# sourceMappingURL=image.d.ts.map

@@ -1,0 +1,30 @@
+  ["system", "Write typescript code only. Using io-ts library to create type."],
+        ["user", "type: 'NumberOfImages', condition: 'should be multiple of 4 and greater than 0, primitive: 'string'"],
+        ["assistant", `import * as t from 'io-ts';
+
+const isNumberOfImages = (n: unknown): n is number => 
+  typeof n === 'number' && n % 4 === 0 && n > 0;
+
+export const NumberOfImages = new t.Type<number, number, unknown>(
+  'NumberOfImages',
+  isNumberOfImages,
+  (input, context) => isNumberOfImages(input) ? t.success(input) : t.failure(input, context),
+  t.identity
+);`],
+        ["user", "type: 'ImageRequestStatus', condition: 'should be one of ['pending', 'in_process', 'in_review', 'completed']', primitive: 'string'"],
+        ["assistant", `import * as t from 'io-ts';
+
+export enum ImageRequestStatus {{
+    PENDING = 'pending',
+    IN_PROGRESS = 'in_progress',
+    TO_REVIEW = 'to_review',
+    COMPLETED = 'completed'
+}}
+
+export const ImageRequestStatusEnum = t.keyof({{
+    pending: null,
+    in_progress: null,
+    to_review: null,
+    completed: null
+}});`],
+        ["user", "{input}"]

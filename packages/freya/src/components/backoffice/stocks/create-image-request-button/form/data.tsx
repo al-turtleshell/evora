@@ -1,3 +1,4 @@
+import { ImageRequestProject } from '@turtleshell/asgard/src/aggregate/image-request/enums';
 import { Miscue } from '@turtleshell/daedelium';
 
 import * as E from 'fp-ts/lib/Either';
@@ -20,13 +21,15 @@ export const schema = z.object({
     style: z.nativeEnum(ImageStyle),
     numberOfImages: z.string().refine(value => parseInt(value) % 4 === 0, {
         message: "The number must be a multiple of 4",
-      })
+      }),
+    project: z.nativeEnum(ImageRequestProject)
 })
 
 export const defaultValues = {
     description: "",
     style: ImageStyle.BLACK_AND_WHITE_ILLUSTRATION,
-    numberOfImages: '4'
+    numberOfImages: '4',
+    project: ImageRequestProject.ADOBE_STOCK
 }
 
 

@@ -11,6 +11,11 @@ declare const ImageRequestCodec: t.IntersectionC<[t.TypeC<{
         to_review: null;
         completed: null;
     }>;
+    project: t.KeyofC<{
+        instagram: null;
+        adobe_stock: null;
+        yt_short: null;
+    }>;
     images: t.ArrayC<t.IntersectionC<[t.TypeC<{
         id: t.BrandC<t.StringC, import("@turtleshell/daedelium").UUIDBrand>;
         status: t.KeyofC<{
@@ -31,13 +36,14 @@ declare const ImageRequestCodec: t.IntersectionC<[t.TypeC<{
 }>]>;
 export type ImageRequest = t.TypeOf<typeof ImageRequestCodec>;
 export declare const ImageRequest: {
-    create: ({ id, numberOfImages, style, description, images, prompt, status }: CreateImageRequestDto) => Either<Miscue, ImageRequest>;
+    create: ({ id, numberOfImages, style, description, images, prompt, status, project }: CreateImageRequestDto) => Either<Miscue, ImageRequest>;
     toDto: (imageRequest: ImageRequest) => Either<Miscue, ImageRequestDto>;
     addImage: (imageRequest: ImageRequest, id: string) => Either<Miscue, ImageRequest>;
     addImages: (imageRequest: ImageRequest, ids: string[]) => Either<Miscue, ImageRequest>;
     setPrompt: (imageRequest: ImageRequest, prompt: string) => ImageRequest;
     canGenerateImage: (imageRequest: ImageRequest) => Either<Miscue, ImageRequest>;
     generateImageUrl: (imageRequest: ImageRequest, createPresignedUrl: (key: string) => TE.TaskEither<Miscue, string>) => TE.TaskEither<Miscue, ImageRequest>;
+    review: (imageRequest: ImageRequest) => TE.TaskEither<Miscue, ImageRequest>;
 };
 export {};
 //# sourceMappingURL=image-request.d.ts.map

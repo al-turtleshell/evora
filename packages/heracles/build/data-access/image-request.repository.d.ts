@@ -4,13 +4,14 @@ import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-reque
 import { ImageRequestStatus } from "@turtleshell/asgard/build/aggregate/image-request/enums";
 type GetAllParams = {
     limit?: number;
-    status?: ImageRequestStatus;
+    status?: ImageRequestStatus[];
     skip?: number;
 };
 export declare const ImageRequestRepository: {
     save: (imageRequest: ImageRequestDto) => TE.TaskEither<Miscue, ImageRequestDto>;
     getById: (id: string) => TE.TaskEither<Miscue, ImageRequestDto>;
     getAll: ({ limit, status, skip }: GetAllParams) => TE.TaskEither<Miscue, ImageRequestDto[]>;
+    getImageRequestToReview: () => TE.TaskEither<Miscue, ImageRequestDto[]>;
 };
 export type ImageRequestRepository = typeof ImageRequestRepository;
 export {};

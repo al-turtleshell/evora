@@ -5,35 +5,35 @@ import * as TE from 'fp-ts/lib/TaskEither';
 import { v4 as uuid } from 'uuid';
 import { pipe } from 'fp-ts/lib/function';
 import { Miscue, MiscueCode, UUID, decode } from '@turtleshell/daedelium';
-import { ImageRequestStatus, ImageRequestStatusEnum, ImageStyleEnum } from './enums';
+import { ImageRequestProject, ImageRequestProjectEnum, ImageRequestStatus, ImageRequestStatusEnum, ImageStatus, ImageStyleEnum } from './enums';
 import { NumberOfImages } from './types';
 import { CreateImageRequestDto, ImageRequestDto } from './dtos';
 import { ImageRequestCreatingErrorMiscue, PromptNotSetMiscue, RequestInvalidStatusMiscue } from '../../miscue';
 
-const ImageRequestCodec = t.intersection([
+const ImageRequestCodec =
     t.type({
         id: UUID,
         status: ImageRequestStatusEnum,
+        project: ImageRequestProjectEnum,
         images: t.array(ImageCodec),
         numberOfImages: NumberOfImages,
         style: ImageStyleEnum,
-        description: t.string
-    }),
-    t.partial({
-        prompt: t.string,
-    })
-]);
+        description: t.string,
+        prompt: t.string
+    });
+
 
 export type ImageRequest = t.TypeOf<typeof ImageRequestCodec>;
 
 
-const create = ({id, numberOfImages, style, description, images, prompt, status} : CreateImageRequestDto): Either<Miscue, ImageRequest> => {
+const create = ({id, numberOfImages, style, description, images, prompt, status, project} : CreateImageRequestDto): Either<Miscue, ImageRequest> => {
     return decode(ImageRequestCodec, {
         id: id ?? uuid(),
-        numberOfImages,
+        numberOfImages: project == ImageRequestProject.ADOBE_STOCK ? 64 : numberOfImages,
         style,
         description,
         prompt,
+        project,
         status: status ?? ImageRequestStatus.PENDING,
         images: images ?? []
         },
@@ -42,16 +42,13 @@ const create = ({id, numberOfImages, style, description, images, prompt, status}
 }
 
 const toDto = (imageRequest: ImageRequest): Either<Miscue, ImageRequestDto> => {
-    if (imageRequest.prompt === undefined) {
-        return left(PromptNotSetMiscue(imageRequest.id));
-    }
-
     return right({
         id: imageRequest.id,
         status: imageRequest.status,
         images: imageRequest.images.map(image => Image.toDto(image)),
         numberOfImages: imageRequest.numberOfImages,
         style: imageRequest.style,
+        project: imageRequest.project,
         description: imageRequest.description,
         prompt: imageRequest.prompt,
     });
@@ -116,6 +113,26 @@ const generateImageUrl = (imageRequest: ImageRequest, createPresignedUrl: (key: 
     );
 }
 
+const review = (imageRequest: ImageRequest): TE.TaskEither<Miscue, ImageRequest> => {
+    const check = imageRequest.images.every(image => image.status === ImageStatus.ACCEPTED || image.status === ImageStatus.REJECTED);
+    if (!check) {
+        return TE.left(Miscue.create({
+            code: MiscueCode.IMAGE_REQUEST_REVIEW_ERROR,
+            message: 'Image request review failed',
+            timestamp: Date.now(),
+            details: `Some images are not reviewed`
+        }));
+    }
+
+    return TE.right({
+        ...imageRequest,
+        status: ImageRequestStatus.COMPLETED
+    });
+}
+
+
+
+
 export const ImageRequest = {
     create,
     toDto,
@@ -123,6 +140,7 @@ export const ImageRequest = {
     addImages,
     setPrompt,
     canGenerateImage,
-    generateImageUrl
+    generateImageUrl,
+    review
 }
 

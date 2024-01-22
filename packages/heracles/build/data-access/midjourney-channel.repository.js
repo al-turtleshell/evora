@@ -33,7 +33,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MidjourneyChannelRepository = void 0;
-const prisma_client_1 = require("../ clients/prisma.client");
+const prisma_client_1 = require("../clients/prisma.client");
 const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const daedelium_1 = require("@turtleshell/daedelium");
 const prisma = (0, prisma_client_1.getPrismaClient)();

@@ -33,9 +33,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImageRequestRepository = void 0;
-const prisma_client_1 = require("../ clients/prisma.client");
+const prisma_client_1 = require("../clients/prisma.client");
 const TE = __importStar(require("fp-ts/lib/TaskEither"));
 const daedelium_1 = require("@turtleshell/daedelium");
+const enums_1 = require("@turtleshell/asgard/build/aggregate/image-request/enums");
 const prisma = (0, prisma_client_1.getPrismaClient)();
 const save = (imageRequest) => TE.tryCatch(() => __awaiter(void 0, void 0, void 0, function* () {
     yield prisma.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,26 +49,36 @@ const save = (imageRequest) => TE.tryCatch(() => __awaiter(void 0, void 0, void 
             }
         });
         if (exist) {
-            yield prisma.imageRequest.update({
+            // await prisma.imageRequest.update({
+            //     where: {
+            //         id: imageRequest.id
+            //     },
+            //     data: {
+            //         numberOfImages: imageRequest.numberOfImages,
+            //         style: imageRequest.style as ImageStyle,
+            //         description: imageRequest.description,
+            //         prompt: imageRequest.prompt,
+            //         status: imageRequest.status as ImageRequestStatus
+            //     }
+            // });
+            // await prisma.image.createMany({
+            //     data: imageRequest.images.map(image => ({
+            //         id: image.id,
+            //         imageRequestId: imageRequest.id,
+            //         status: image.status as ImageStatus
+            //     }))
+            // })
+            // return;
+            yield prisma.image.deleteMany({
                 where: {
-                    id: imageRequest.id
-                },
-                data: {
-                    numberOfImages: imageRequest.numberOfImages,
-                    style: imageRequest.style,
-                    description: imageRequest.description,
-                    prompt: imageRequest.prompt,
-                    status: imageRequest.status
+                    imageRequestId: imageRequest.id
                 }
             });
-            yield prisma.image.createMany({
-                data: imageRequest.images.map(image => ({
-                    id: image.id,
-                    imageRequestId: imageRequest.id,
-                    status: image.status
-                }))
+            yield prisma.imageRequest.delete({
+                where: {
+                    id: imageRequest.id
+                }
             });
-            return;
         }
         yield prisma.imageRequest.create({
             data: {
@@ -76,6 +87,7 @@ const save = (imageRequest) => TE.tryCatch(() => __awaiter(void 0, void 0, void 
                 style: imageRequest.style,
                 description: imageRequest.description,
                 prompt: imageRequest.prompt,
+                status: imageRequest.status,
             }
         });
         yield prisma.image.createMany({
@@ -121,7 +133,7 @@ const getAll = ({ limit, status, skip }) => {
                 images: true
             },
             where: {
-                status: status !== null && status !== void 0 ? status : undefined,
+                OR: status ? status.map(s => ({ status: s })) : undefined
             },
             take: limit !== null && limit !== void 0 ? limit : undefined,
             skip: skip !== null && skip !== void 0 ? skip : 0
@@ -133,8 +145,29 @@ const getAll = ({ limit, status, skip }) => {
         details: `Database error ${reason}`
     }));
 };
+const getImageRequestToReview = () => {
+    return TE.tryCatch(() => __awaiter(void 0, void 0, void 0, function* () {
+        return yield prisma.imageRequest.findMany({
+            include: {
+                images: true
+            },
+            where: {
+                OR: [
+                    { status: enums_1.ImageRequestStatus.TO_REVIEW },
+                    { status: enums_1.ImageRequestStatus.IN_PROGRESS }
+                ]
+            },
+        });
+    }), (reason) => daedelium_1.Miscue.create({
+        code: daedelium_1.MiscueCode.DATABASE_ERROR,
+        message: 'Database error',
+        timestamp: Date.now(),
+        details: `Database error ${reason}`
+    }));
+};
 exports.ImageRequestRepository = {
     save,
     getById,
-    getAll
+    getAll,
+    getImageRequestToReview
 };

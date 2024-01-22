@@ -1,12 +1,11 @@
 
-import { ImageRequestDto, ImageRequestStatus } from '@turtleshell/asgard/build/aggregate/image-request/image-request';
-
-
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { v4 as uuid } from 'uuid';
 import { generateImageImageRequestUsecase } from '@turtleshell/asgard/build/use-case/image-request/generate-image.image-request.use-case';
 import { Miscue, MiscueCode } from '@turtleshell/daedelium';
+import { ImageRequestDto } from '@turtleshell/asgard/build/aggregate/image-request/dtos';
+import { ImageRequestStatus } from '@turtleshell/asgard/build/aggregate/image-request/enums';
 
 const getByIdFnSuccess = (imageRequestId: string): TE.TaskEither<Miscue, ImageRequestDto> => {
     return TE.right({
@@ -49,6 +48,7 @@ const getByIdFnSuccessNoPrompt = (imageRequestId: string): TE.TaskEither<Miscue,
         id: imageRequestId,
         images: [],
         status: 'completed',
+        prompt: '',
         numberOfImages: 24,
         style: 'black_and_white_illustration',
         description: 'description',
@@ -83,7 +83,7 @@ const generateImageFnFailed = (prompt: string): TE.TaskEither<Miscue, string[]> 
 const saveFnSuccess = (data: ImageRequestDto) => TE.tryCatch(
     () => Promise.resolve(data), 
     () => Miscue.create({
-        code: MiscueCode.DATABASE_SAVE_ERROR, 
+        code: MiscueCode.DATABASE_ERROR, 
         message: 'Database save error',
         timestamp: Date.now(),
     })
@@ -92,7 +92,7 @@ const saveFnSuccess = (data: ImageRequestDto) => TE.tryCatch(
 const saveFnFailed = (data: ImageRequestDto) => TE.tryCatch(
     () => Promise.reject(data), 
     () => Miscue.create({
-        code: MiscueCode.DATABASE_SAVE_ERROR, 
+        code: MiscueCode.DATABASE_ERROR, 
         message: 'Database save error',
         timestamp: Date.now(),
     })
@@ -165,23 +165,6 @@ describe('Use case error path', () => {
             })
         )()
     });
-
-    it('should return Miscue on Image request cannot not generate image when prompt is not set', async () => {
-        await pipe(
-            generateImageImageRequestUsecase({ 
-            save: saveFnSuccess,
-            getById: getByIdFnSuccessNoPrompt,
-            generateImage: generateImageFnFailed,
-        })('4e9d60be-324d-46f3-b3ed-6ad15c6bebd5'),
-            TE.mapLeft((error) => {
-                expect(error.code).toBe(MiscueCode.IMAGE_REQUEST_PROMPT_NOT_SET);
-                expect(error.details).toBe('Prompt is undefined for image request with id 4e9d60be-324d-46f3-b3ed-6ad15c6bebd5');
-            }),
-            TE.map((data) => {
-                expect(data).toBeUndefined();
-            })
-        )()
-    });
   
     it('should return Miscue on Image request cannot not add Image', async () => {
         await pipe(
@@ -207,7 +190,7 @@ describe('Use case error path', () => {
             generateImage: generateImageFnSuccess,
         })('4e9d60be-324d-46f3-b3ed-6ad15c6bebd5'),
             TE.mapLeft((error) => {
-                expect(error.code).toBe(MiscueCode.DATABASE_SAVE_ERROR);
+                expect(error.code).toBe(MiscueCode.DATABASE_ERROR);
             }),
             TE.map((data) => {
                 expect(data).toBeUndefined();

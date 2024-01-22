@@ -34,12 +34,3 @@ const createImageRequestUsecase = ({ save, generatePrompt }) => (data) => {
     return (0, function_1.pipe)((0, daedelium_1.decode)(dtos_1.CreateImageRequestDto, data), E.chain(dto => image_request_1.ImageRequest.create(dto)), TE.fromEither, TE.chain(imageRequest => (0, function_1.pipe)(generatePrompt(imageRequest.description, imageRequest.style), TE.map(prompt => image_request_1.ImageRequest.setPrompt(imageRequest, prompt)))), TE.chainEitherK(image_request_1.ImageRequest.toDto), TE.chain(save));
 };
 exports.createImageRequestUsecase = createImageRequestUsecase;
-// export const createImageRequestUsecase = ({ save, generatePrompt }: Context) => (data: CreateImageRequestDto): TE.TaskEither<Miscue, ImageRequestDto> => {
-//     return pipe(
-//         TE.bindTo("createImageDto")(TE.fromEither(decode(CreateImageRequestDto, data))),
-//         TE.bind("imageRequest", ({ createImageDto }) => TE.fromEither(ImageRequest.create(createImageDto))),
-//         TE.bind("prompt", ({ imageRequest }) => generatePrompt(imageRequest.description, imageRequest.style)),
-//         TE.bind("imageRequestWithPrompt", ({ imageRequest, prompt }) => TE.of(ImageRequest.setPrompt(imageRequest, prompt))),
-//         TE.map(({ imageRequestWithPrompt }) => ImageRequest.toDto(imageRequestWithPrompt)),
-//     )
-// }

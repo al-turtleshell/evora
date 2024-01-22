@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model ImageRequest {
   id              String              @id @default(uuid())
   numberOfImages  Int
@@ -14,6 +15,7 @@ model ImageRequest {
   description     String
   prompt          String
   status          ImageRequestStatus  @default(pending)
+  project         ImageRequestProject @default(adobe_stock)
   images          Image[]
 }
 
@@ -23,6 +25,7 @@ model Image {
   imageRequestId    String
   imageRequest      ImageRequest  @relation(fields: [imageRequestId], references: [id])
 }
+
 
 // should be sync with ImageStatus in @turtleshell/zeus Image
 enum ImageStyle {
@@ -41,6 +44,12 @@ enum ImageRequestStatus {
   in_progress
   to_review
   completed
+}
+
+enum ImageRequestProject {
+  instagram
+  adobe_stock
+  youtube_short
 }
 
 model MidjourneyChannel {

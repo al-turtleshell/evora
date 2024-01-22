@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3 } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Miscue, MiscueCode } from "@turtleshell/daedelium";
 import * as TE from 'fp-ts/lib/TaskEither';
@@ -8,7 +8,7 @@ import fs from 'fs';
 const createPresignedUrl = (s3: S3, bucket: string) => ( key: string): TE.TaskEither<Miscue, string> => TE.tryCatch(
     () => {
         {
-            const command = new PutObjectCommand({ Bucket: bucket, Key: key });
+            const command = new GetObjectCommand({ Bucket: bucket, Key: key });
             return getSignedUrl(s3, command, { expiresIn: 18000 });
         };
     },

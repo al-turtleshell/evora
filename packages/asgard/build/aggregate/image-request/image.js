@@ -51,8 +51,16 @@ const toDto = (image) => {
 const addUrl = (image, url) => {
     return Object.assign(Object.assign({}, image), { url });
 };
+const accept = (image) => {
+    return Object.assign(Object.assign({}, image), { status: enums_1.ImageStatus.ACCEPTED });
+};
+const reject = (image) => {
+    return Object.assign(Object.assign({}, image), { status: enums_1.ImageStatus.REJECTED });
+};
 exports.Image = {
     create,
     toDto,
     addUrl,
+    accept,
+    reject
 };

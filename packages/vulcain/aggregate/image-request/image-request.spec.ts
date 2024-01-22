@@ -3,11 +3,9 @@ import { ImageRequest } from '@turtleshell/asgard';
 import { map, mapLeft, chain } from 'fp-ts/lib/Either';
 import { v4 as uuid } from 'uuid';
 
-import { ImageRequestStatus } from "@turtleshell/asgard/build/aggregate/image-request/image-request";
 import { MiscueCode } from "@turtleshell/daedelium";
 
-
-
+import { ImageRequestStatus } from '@turtleshell/asgard/build/aggregate/image-request/enums';
 
 describe('ImageRequest creation errors', () => {
     it('should return Miscue when numberOfImages is not multiple of 4', () => {
@@ -95,14 +93,17 @@ describe('ImageRequest creation success', () => {
                 status: 'completed',
                 images: []
             }),
-            map(imageRequest => {
-                const dto = ImageRequest.toDto(imageRequest);
+            chain(ImageRequest.toDto),
+            map(dto => {
                 expect(dto.id).toBe(id);
                 expect(dto.prompt).toBe('A prompt');
                 expect(dto.images).toHaveLength(0);
                 expect(dto.status).toBe('completed');
                 expect(dto.description).toBe('A description');
                 expect(dto.numberOfImages).toBe(24);
+            }),
+            mapLeft(miscue => {
+                expect(miscue).toBeUndefined();
             })
         )
     });

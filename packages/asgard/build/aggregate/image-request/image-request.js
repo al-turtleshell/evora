@@ -38,6 +38,7 @@ const ImageRequestCodec = t.intersection([
     t.type({
         id: daedelium_1.UUID,
         status: enums_1.ImageRequestStatusEnum,
+        project: enums_1.ImageRequestProjectEnum,
         images: t.array(image_1.ImageCodec),
         numberOfImages: types_1.NumberOfImages,
         style: enums_1.ImageStyleEnum,
@@ -47,13 +48,14 @@ const ImageRequestCodec = t.intersection([
         prompt: t.string,
     })
 ]);
-const create = ({ id, numberOfImages, style, description, images, prompt, status }) => {
+const create = ({ id, numberOfImages, style, description, images, prompt, status, project }) => {
     return (0, daedelium_1.decode)(ImageRequestCodec, {
         id: id !== null && id !== void 0 ? id : (0, uuid_1.v4)(),
         numberOfImages,
         style,
         description,
         prompt,
+        project,
         status: status !== null && status !== void 0 ? status : enums_1.ImageRequestStatus.PENDING,
         images: images !== null && images !== void 0 ? images : []
     }, miscue_1.ImageRequestCreatingErrorMiscue);
@@ -68,6 +70,7 @@ const toDto = (imageRequest) => {
         images: imageRequest.images.map(image => image_1.Image.toDto(image)),
         numberOfImages: imageRequest.numberOfImages,
         style: imageRequest.style,
+        project: imageRequest.project,
         description: imageRequest.description,
         prompt: imageRequest.prompt,
     });
@@ -96,6 +99,18 @@ const canGenerateImage = (imageRequest) => {
 const generateImageUrl = (imageRequest, createPresignedUrl) => {
     return (0, function_1.pipe)(TE.traverseArray((image) => (0, function_1.pipe)(createPresignedUrl(image.id), TE.map((url) => image_1.Image.addUrl(image, url))))(imageRequest.images), TE.map((readonlyUpdatedImages) => Array.from(readonlyUpdatedImages)), TE.map((updatedImages) => (Object.assign(Object.assign({}, imageRequest), { images: updatedImages }))));
 };
+const review = (imageRequest) => {
+    const check = imageRequest.images.every(image => image.status === enums_1.ImageStatus.ACCEPTED || image.status === enums_1.ImageStatus.REJECTED);
+    if (!check) {
+        return TE.left(daedelium_1.Miscue.create({
+            code: daedelium_1.MiscueCode.IMAGE_REQUEST_REVIEW_ERROR,
+            message: 'Image request review failed',
+            timestamp: Date.now(),
+            details: `Some images are not reviewed`
+        }));
+    }
+    return TE.right(Object.assign(Object.assign({}, imageRequest), { status: enums_1.ImageRequestStatus.COMPLETED }));
+};
 exports.ImageRequest = {
     create,
     toDto,
@@ -103,5 +118,6 @@ exports.ImageRequest = {
     addImages,
     setPrompt,
     canGenerateImage,
-    generateImageUrl
+    generateImageUrl,
+    review
 };

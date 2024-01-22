@@ -68,9 +68,16 @@ const sendImagineCommand = (midjourneyBotId) => (channel, prompt) => {
         timestamp: Date.now(),
     }));
 };
-const generateImage = (selectChannel, setChannelAsBusy, sendImagineCommand, waitForImageCompletion, downloadImage, cutIntoQuadrant, storeImages, cleanUp, setChannelAsFree) => (prompt) => {
+const deleteMessage = (channel) => {
+    return (0, function_1.pipe)(TE.tryCatch(() => channel.messages.fetch({ limit: 1 }), () => daedelium_1.Miscue.create({
+        code: daedelium_1.MiscueCode.IMAGE_GENERATION_ERROR,
+        message: 'There was an issue while deleting the message',
+        timestamp: Date.now(),
+    })), TE.map(messages => { var _a; return (_a = messages.first()) === null || _a === void 0 ? void 0 : _a.delete(); }));
+};
+const generateImage = (selectChannel, setChannelAsBusy, sendImagineCommand, waitForImageCompletion, downloadImage, cutIntoQuadrant, storeImages, cleanUp, deleteMessage, setChannelAsFree) => (prompt) => {
     const id = (0, uuid_1.v4)();
-    return (0, function_1.pipe)(selectChannel(), TE.chain(channel => (0, function_1.pipe)(TE.bindTo('_1')(setChannelAsBusy(channel.id)), TE.bind('_2', () => sendImagineCommand(channel, prompt)), TE.bind('url', () => waitForImageCompletion(channel)), TE.bind('_3', ({ url }) => downloadImage(url, `/preview_${id}.png`)), TE.bind('uuids', () => cutIntoQuadrant(`./preview_${id}.png`)), TE.bind('_4', ({ uuids }) => storeImages(uuids)), TE.bind('_5', ({ uuids }) => cleanUp(id, uuids)), TE.bind('_6', () => setChannelAsFree(channel.id)), TE.map(({ uuids }) => uuids), TE.mapLeft(miscue => { setChannelAsFree(channel.id)(); return miscue; }))));
+    return (0, function_1.pipe)(selectChannel(), TE.chain(channel => (0, function_1.pipe)(TE.bindTo('_1')(setChannelAsBusy(channel.id)), TE.bind('_2', () => sendImagineCommand(channel, prompt)), TE.bind('url', () => waitForImageCompletion(channel)), TE.bind('_3', ({ url }) => downloadImage(url, `/preview_${id}.png`)), TE.bind('uuids', () => cutIntoQuadrant(`./preview_${id}.png`)), TE.bind('_4', ({ uuids }) => storeImages(uuids)), TE.bind('_5', ({ uuids }) => cleanUp(id, uuids)), TE.bind('_6', () => setChannelAsFree(channel.id)), TE.bind('_7', () => deleteMessage(channel)), TE.map(({ uuids }) => uuids), TE.mapLeft(miscue => { setChannelAsFree(channel.id)(); deleteMessage(channel); return miscue; }))));
 };
 const createImageGenerationService = (discordClient, storeImages, repository, midjourneyBotId, path) => {
     return (0, function_1.pipe)(repository.getAllChannel(), TE.chain(channels => {
@@ -85,9 +92,23 @@ const createImageGenerationService = (discordClient, storeImages, repository, mi
             code: daedelium_1.MiscueCode.MIDJOURNEY_CANNOT_FETCH_CHANNEL_MESSAGE,
             message: 'Cannot fetch channel message',
             timestamp: Date.now(),
-        })), TE.map(messages => { var _a, _b, _c; return (_c = (_b = (_a = messages.first()) === null || _a === void 0 ? void 0 : _a.attachments) === null || _b === void 0 ? void 0 : _b.first()) === null || _c === void 0 ? void 0 : _c.url; })), (url) => url !== undefined, 5, 15000, 'check image completion'), TE.map(url => url));
+        })), TE.map(messages => messages.first())), (message) => {
+            var _a, _b;
+            if (!message) {
+                return false;
+            }
+            const attachment = (_b = (_a = message.attachments) === null || _a === void 0 ? void 0 : _a.first()) === null || _b === void 0 ? void 0 : _b.url;
+            if (!attachment) {
+                return false;
+            }
+            const content = message.content;
+            if (content.includes('%)')) {
+                return false;
+            }
+            return true;
+        }, 5, 15000, 'check image completion'), TE.map(message => { var _a, _b; return (_b = (_a = message === null || message === void 0 ? void 0 : message.attachments) === null || _a === void 0 ? void 0 : _a.first()) === null || _b === void 0 ? void 0 : _b.url; }));
         return {
-            generateImage: generateImage(selectChannel(channels, repository), setChannelAsBusy(repository), sendImagineCommand(midjourneyBotId), waitForImageCompletion, (0, daedelium_1.downloadImage)(path), (0, daedelium_1.cutIntoQuadrant)(path), storeImages, cleanUp(path), setChannelAsFree(repository))
+            generateImage: generateImage(selectChannel(channels, repository), setChannelAsBusy(repository), sendImagineCommand(midjourneyBotId), waitForImageCompletion, (0, daedelium_1.downloadImage)(path), (0, daedelium_1.cutIntoQuadrant)(path), storeImages, cleanUp(path), deleteMessage, setChannelAsFree(repository))
         };
     }));
 };

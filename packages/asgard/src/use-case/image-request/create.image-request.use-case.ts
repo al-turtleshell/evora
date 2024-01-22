@@ -23,14 +23,3 @@ export const createImageRequestUsecase = ({ save, generatePrompt }: Context) => 
         TE.chain(save)
     )
 }
-
-// export const createImageRequestUsecase = ({ save, generatePrompt }: Context) => (data: CreateImageRequestDto): TE.TaskEither<Miscue, ImageRequestDto> => {
-//     return pipe(
-//         TE.bindTo("createImageDto")(TE.fromEither(decode(CreateImageRequestDto, data))),
-//         TE.bind("imageRequest", ({ createImageDto }) => TE.fromEither(ImageRequest.create(createImageDto))),
-//         TE.bind("prompt", ({ imageRequest }) => generatePrompt(imageRequest.description, imageRequest.style)),
-//         TE.bind("imageRequestWithPrompt", ({ imageRequest, prompt }) => TE.of(ImageRequest.setPrompt(imageRequest, prompt))),
-//         TE.map(({ imageRequestWithPrompt }) => ImageRequest.toDto(imageRequestWithPrompt)),
-
-//     )
-// }

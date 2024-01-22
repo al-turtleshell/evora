@@ -7,6 +7,7 @@ export const MiscueCodeEnum = t.keyof({
     'ir-0003': null,
     'ir-0004': null,
     'ir-0005' : null,
+    
 
     'i-0000': null,
     '1000': null,
@@ -39,6 +40,8 @@ export const MiscueCodeEnum = t.keyof({
     'fs-0001': null,
 
     'a-0000': null,
+
+    'p-0000': null
 });
 
 export enum MiscueCode {
@@ -68,6 +71,7 @@ export enum MiscueCode {
     IMAGE_REQUEST_INVALID_STATUS    = 'ir-0002',
     IMAGE_REQUEST_DATABASE_SAVE_ERROR = 'ir-0003',
     IMAGE_REQUEST_NOT_FOUND_ERROR   = 'ir-0004',
+    IMAGE_REQUEST_REVIEW_ERROR = 'ir-0005',
 
     IMAGE_REQUEST_CRON_NO_REQUEST_AVAILABLE = 'ir-0005',
     IMAGE_CREATTNG_ERROR            = 'i-0000',
@@ -80,4 +84,6 @@ export enum MiscueCode {
     IMAGE_GENERATION_SERVICE_CLEANUP_ERROR = 'igs-0000',
     IMAGE_GENERATION_SERVICE_CHANNEL_FETCH_ERROR = 'igs-0001',
     IMAGE_GENERATION_SERVICE_CHANNEL_IMAGINE_COMMAND_ERROR = 'igs-0002',
+
+    PROCESSUS_DATABASE_ERROR = 'p-0000',
 }

@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { FormSchema, defaultValues, onSubmit, schema } from './data';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { ImageStyle } from '@turtleshell/asgard/src/aggregate/image-request/enums';
+import { ImageRequestProject, ImageStyle } from '@turtleshell/asgard/src/aggregate/image-request/enums';
 
 type Props = {
     closeModal: () => void
@@ -54,6 +54,30 @@ export default function CreateImageRequestForm({ closeModal }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                                 {Object.values(ImageStyle).map((style) => (
+                                    <SelectItem key={style} value={style}>
+                                        {style.replaceAll('_', ' ')}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="project"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Project</FormLabel>
+                    <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Style" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.values(ImageRequestProject).map((style) => (
                                     <SelectItem key={style} value={style}>
                                         {style.replaceAll('_', ' ')}
                                     </SelectItem>

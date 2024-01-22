@@ -1,12 +1,10 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { v4 as uuid } from 'uuid';
-import { Miscue, MiscueCode, UUID, decode  } from "@turtleshell/daedelium";
+import { Miscue, UUID, decode  } from "@turtleshell/daedelium";
 import { CreateImageDto, ImageDto } from './dtos';
 import { ImageStatus, ImageStatusEnum } from './enums';
 import { ImageCreatingErrorMiscue } from '../../miscue';
-
-
 
 
 export const ImageCodec = t.intersection([
@@ -44,8 +42,24 @@ const addUrl = (image: Image, url: string): Image => {
     }
 }
 
+const accept = (image: Image): Image => {
+    return {
+       ...image,
+        status: ImageStatus.ACCEPTED,
+    }
+}
+
+const reject = (image: Image): Image => {
+    return {
+       ...image,
+        status: ImageStatus.REJECTED,
+    }
+}
+
 export const Image = {
     create,
     toDto,
     addUrl,
+    accept,
+    reject
 }

@@ -1,16 +1,15 @@
-import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-request/image-request";
-
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import { createImageRequestUsecase } from '@turtleshell/asgard/build/use-case/image-request/create.image-request.use-case';
-import { ImageStatus, ImageStyle } from "@turtleshell/asgard/build/aggregate/image-request/image";
+import { ImageStatus, ImageStyle } from '@turtleshell/asgard/build/aggregate/image-request/enums';
 import { v4 as uuid } from "uuid";
 import { Miscue, MiscueCode } from "@turtleshell/daedelium";
+import { ImageRequestDto } from "@turtleshell/asgard/build/aggregate/image-request/dtos";
 
 const saveFnSuccess = (data: ImageRequestDto) => TE.tryCatch(
     () => Promise.resolve(data), 
     () => Miscue.create({
-        code: MiscueCode.DATABASE_SAVE_ERROR, 
+        code: MiscueCode.DATABASE_ERROR, 
         message: 'Database save error',
         timestamp: Date.now(),
     })
@@ -19,7 +18,7 @@ const saveFnSuccess = (data: ImageRequestDto) => TE.tryCatch(
 const saveFnFailed = (data: ImageRequestDto) => TE.tryCatch(
     () => Promise.reject(data), 
     () => Miscue.create({
-        code: MiscueCode.DATABASE_SAVE_ERROR, 
+        code: MiscueCode.DATABASE_ERROR, 
         message: 'Database save error',
         timestamp: Date.now(),
     })
@@ -72,7 +71,7 @@ describe('Use case error path', () => {
         pipe(
             createImageRequestUsecase({ save: saveFnFailed, generatePrompt: generatePromptFnSuccess })({ numberOfImages: 24, description: 'test', style: ImageStyle.BLACK_AND_WHITE_ILLUSTRATION }),
             TE.mapLeft((error) => {
-                expect(error.code).toBe(MiscueCode.DATABASE_SAVE_ERROR);
+                expect(error.code).toBe(MiscueCode.DATABASE_ERROR);
             }),
             TE.map((data) => {
                 expect(data).toBeUndefined();
